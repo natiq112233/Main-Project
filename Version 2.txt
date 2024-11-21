@@ -1,0 +1,845 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import java.awt.Desktop;
+
+class CareerInterestMatcherAppGUI {
+    private JFrame frame;
+    private JPanel signUpPanel, loginPanel, surveyPanel, questionPanel, resultsPanel;
+    private JProgressBar progressBar;
+    private JTextField usernameField, emailField;
+    private JPasswordField passwordField;
+    private JButton signUpButton, loginButton;
+    private ArrayList<String> questions;
+    private ArrayList<String> responses;
+    private int questionIndex;
+    private Map<String, String> topicDetails;
+
+    public CareerInterestMatcherAppGUI() {
+        frame = new JFrame("Career Interest Matcher");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(600, 500);
+        frame.setLocationRelativeTo(null);
+        frame.setLayout(new BorderLayout());
+
+        UIManager.put("Button.font", new Font("Arial", Font.PLAIN, 14));
+        UIManager.put("Label.font", new Font("Arial", Font.BOLD, 14));
+        UIManager.put("TextField.font", new Font("Arial", Font.PLAIN, 14));
+        UIManager.put("PasswordField.font", new Font("Arial", Font.PLAIN, 14));
+
+        questions = new ArrayList<>();
+        responses = new ArrayList<>();
+        questionIndex = 0;
+        topicDetails = loadTopicDetails();
+        // Sample questions
+        questions.add("Do you enjoy coding? (yes/no)");
+        questions.add("Are you interested in cybersecurity? (yes/no)");
+        questions.add("Do you like working with data? (yes/no)");
+        questions.add("Do you enjoy managing IT systems? (yes/no)");
+        questions.add("Are you comfortable working in teams? (yes/no)");
+        questions.add("Do you have an interest in artificial intelligence? (yes/no)");
+        questions.add("Do you enjoy designing user interfaces? (yes/no)");
+        questions.add("Are you interested in network administration? (yes/no)");
+        questions.add("Do you like troubleshooting hardware issues? (yes/no)");
+        questions.add("Do you enjoy teaching others about technology? (yes/no)");
+        questions.add("Rate your programming skills (1-5)");
+        questions.add("Rate your analytical skills (1-5)");
+        questions.add("Rate your communication skills (1-5)");
+        questions.add("Rate your problem-solving skills (1-5)");
+        questions.add("Rate your creativity (1-5)");
+
+        initializeLoginPanel();
+        frame.add(loginPanel, BorderLayout.CENTER);
+        frame.setVisible(true);
+    }
+
+    private Map<String, String> loadTopicDetails() {
+        Map<String, String> details = new HashMap<>();
+
+        details.put("coding", "Coding translates real-world problems into instructions a computer can follow. " +
+                "It involves using programming languages like Java, Python, or C++ to create applications, " +
+                "automate tasks, and solve complex problems.\n\n" +
+                "In coding, you learn about algorithms (steps to solve a problem) and data structures (ways to organize data). " +
+                "These skills are fundamental in developing software, building websites, creating mobile applications, " +
+                "and more.\n\n" +
+                "Careers in coding include roles such as Software Developer, Web Developer, and Game Programmer. " +
+                "Coding is essential for anyone interested in technology.");
+
+        details.put("cybersecurity", "Cybersecurity is the practice of protecting systems, networks, and data from digital attacks. " +
+                "It encompasses a range of fields, from ethical hacking to network security to compliance and risk management.\n\n" +
+                "In cybersecurity, you’ll work with technologies like firewalls, encryption, and intrusion detection systems. " +
+                "Key practices include risk assessment, vulnerability testing, and implementing security policies.\n\n" +
+                "Popular roles in cybersecurity include Cybersecurity Analyst, Security Consultant, and Penetration Tester. " +
+                "This field is critical as cyber threats continue to grow, impacting organizations and individuals alike.");
+
+        details.put("data", "Data refers to raw information that can take various forms, such as text, numbers, images, or audio. " +
+                "In today’s digital world, data is generated constantly and can be analyzed to extract meaningful insights.\n\n" +
+                "Data professionals use techniques like data mining, machine learning, and statistical analysis to interpret data. " +
+                "They work with tools like SQL, Python, and R to process large datasets and make data-driven decisions.\n\n" +
+                "Common career paths in data include Data Analyst, Data Scientist, and Data Engineer. This field is pivotal in " +
+                "helping companies understand customer behavior, optimize operations, and make strategic decisions.");
+
+        details.put("it systems", "Managing IT systems involves overseeing the technology infrastructure of an organization, " +
+                "including hardware, software, networks, and security.\n\n" +
+                "IT managers and administrators handle tasks such as server maintenance, network configuration, and user support. " +
+                "They ensure that the organization’s systems are secure, efficient, and reliable.\n\n" +
+                "IT roles include Network Administrator, System Administrator, and IT Support Specialist. " +
+                "Skills in troubleshooting, network protocols, and cybersecurity are essential in this field.");
+
+        details.put("artificial intelligence", "Artificial Intelligence (AI) involves creating systems that can perform tasks requiring human intelligence. " +
+                "This includes machine learning, natural language processing, and robotics.\n\n" +
+                "AI professionals develop algorithms that enable computers to learn from and make decisions based on data. " +
+                "Applications range from autonomous vehicles to virtual assistants.\n\n" +
+                "Careers in AI include Machine Learning Engineer, AI Research Scientist, and Robotics Engineer. " +
+                "AI is a rapidly growing field with applications across various industries.");
+
+        details.put("user interfaces", "Designing User Interfaces (UI) focuses on creating visually appealing and user-friendly interfaces for software applications. " +
+                "This involves understanding user behavior, aesthetics, and usability principles.\n\n" +
+                "UI designers use tools like Adobe XD, Sketch, and Figma to create wireframes, prototypes, and final designs. " +
+                "They collaborate closely with UX designers and developers to ensure seamless user experiences.\n\n" +
+                "Career paths include UI Designer, UX/UI Developer, and Product Designer. Effective UI design enhances user satisfaction and engagement.");
+
+        details.put("network administration", "Network Administration involves managing and maintaining computer networks within an organization. " +
+                "This includes configuring routers, switches, and firewalls to ensure network security and efficiency.\n\n" +
+                "Network administrators monitor network performance, troubleshoot issues, and implement upgrades as needed. " +
+                "They also manage user access and ensure data integrity across the network.\n\n" +
+                "Careers in this field include Network Administrator, Network Engineer, and Systems Engineer. " +
+                "Strong knowledge of networking protocols and security measures is essential.");
+
+        details.put("hardware troubleshooting", "Troubleshooting hardware involves diagnosing and fixing physical components of computers and other devices. " +
+                "This includes identifying faulty parts, replacing hardware components, and ensuring optimal performance.\n\n" +
+                "Technicians must understand the functionality of various hardware devices and possess problem-solving skills to resolve issues efficiently.\n\n" +
+                "Career options include Hardware Technician, IT Support Specialist, and Field Service Engineer. " +
+                "This role is crucial for maintaining the reliability and functionality of IT infrastructure.");
+
+        details.put("teaching technology", "Teaching technology involves educating others about technological tools, software, and best practices. " +
+                "This can range from instructing beginners on basic computer usage to training professionals in advanced software applications.\n\n" +
+                "Tech educators develop curriculum, create instructional materials, and assess learner progress. " +
+                "They often work in educational institutions, corporate training departments, or as independent consultants.\n\n" +
+                "Careers include Technology Instructor, Corporate Trainer, and Educational Consultant. " +
+                "Effective communication and a deep understanding of technology are key skills in this field.");
+
+        details.put("programming skills", "Programming skills refer to the ability to write, understand, and maintain code in various programming languages. " +
+                "This includes knowledge of syntax, algorithms, and data structures.\n\n" +
+                "Strong programming skills enable developers to build efficient and scalable software solutions, debug code, and optimize performance.\n\n" +
+                "These skills are essential for roles such as Software Developer, Backend Developer, and Full-Stack Developer.");
+
+        details.put("analytical skills", "Analytical skills involve the ability to collect and analyze information, solve problems, and make decisions. " +
+                "These skills are crucial in interpreting data, identifying trends, and developing strategic plans.\n\n" +
+                "Strong analytical skills are valuable in roles such as Data Analyst, Business Analyst, and Financial Analyst, where data-driven decision-making is key.");
+
+        details.put("communication skills", "Communication skills encompass the ability to convey information clearly and effectively, both verbally and in writing. " +
+                "These skills are essential for collaborating with team members, presenting ideas, and interacting with clients or stakeholders.\n\n" +
+                "Effective communication enhances teamwork, reduces misunderstandings, and ensures that projects run smoothly. " +
+                "Roles such as Project Manager, Technical Writer, and Customer Support Specialist highly value strong communication abilities.");
+
+        details.put("problem-solving skills", "Problem-solving skills refer to the ability to identify issues, analyze potential solutions, and implement effective fixes. " +
+                "These skills are critical in navigating challenges, whether technical or interpersonal, within any professional setting.\n\n" +
+                "Strong problem-solving abilities enable individuals to approach obstacles methodically and creatively, leading to successful outcomes. " +
+                "This is essential for roles like Systems Analyst, IT Consultant, and Software Engineer.");
+
+        details.put("creativity", "Creativity in technology involves thinking outside the box to develop innovative solutions, design user-friendly interfaces, and create engaging content. " +
+                "Creative professionals blend technical skills with imaginative thinking to produce unique and effective results.\n\n" +
+                "Creativity is highly valued in fields such as UI/UX Design, Game Development, and Digital Marketing, where originality and user engagement are paramount.");
+
+        return details;
+    }
+
+    private void initializeLoginPanel() {
+        loginPanel = new JPanel(new BorderLayout());
+        loginPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
+        loginPanel.setBackground(new Color(230, 240, 255));
+
+        JLabel headerLabel = new JLabel("Login", JLabel.CENTER);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        headerLabel.setForeground(new Color(0, 102, 204));
+        loginPanel.add(headerLabel, BorderLayout.NORTH);
+
+        JPanel fieldsPanel = new JPanel(new GridLayout(4, 1, 10, 10));
+        fieldsPanel.add(new JLabel("Username:"));
+        usernameField = new JTextField();
+        fieldsPanel.add(usernameField);
+
+        fieldsPanel.add(new JLabel("Password:"));
+
+        JPanel passwordPanel = new JPanel(new BorderLayout());
+        passwordField = new JPasswordField();
+        passwordField.setEchoChar('\u2022');
+
+        JButton eyeButton = new JButton("👁");
+        eyeButton.setPreferredSize(new Dimension(40, 30));
+        eyeButton.setFocusable(false);
+
+        eyeButton.addActionListener(e -> {
+            if (passwordField.getEchoChar() == '\u2022') {
+                passwordField.setEchoChar((char) 0);
+            } else {
+                passwordField.setEchoChar('\u2022');
+            }
+        });
+
+        passwordPanel.add(passwordField, BorderLayout.CENTER);
+        passwordPanel.add(eyeButton, BorderLayout.EAST);
+        fieldsPanel.add(passwordPanel);
+
+        loginPanel.add(fieldsPanel, BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        loginButton = new JButton("Log In");
+        loginButton.setBackground(new Color(51, 153, 255));
+        loginButton.setForeground(Color.WHITE);
+        loginButton.setPreferredSize(new Dimension(150, 40));
+        loginButton.setFont(new Font("Arial", Font.BOLD, 14));
+
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = usernameField.getText().trim();
+                String password = new String(passwordField.getPassword()).trim();
+
+                if (validateLogin(username, password)) {
+                    frame.remove(loginPanel);
+                    initializeSurveyPanel();
+                    frame.add(surveyPanel);
+                    frame.revalidate();
+                    frame.repaint();
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Invalid login details!", "Login Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        JButton signUpLink = new JButton("Sign Up");
+        signUpLink.setForeground(new Color(0, 102, 204));
+        signUpLink.setBackground(Color.WHITE);
+        signUpLink.setPreferredSize(new Dimension(150, 40));
+        signUpLink.setFont(new Font("Arial", Font.BOLD, 14));
+
+        signUpLink.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.remove(loginPanel);
+                initializeSignUpPanel();
+                frame.add(signUpPanel);
+                frame.revalidate();
+                frame.repaint();
+            }
+        });
+
+        buttonPanel.add(loginButton);
+        buttonPanel.add(signUpLink);
+        loginPanel.add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+
+
+    private void initializeSignUpPanel() {
+        signUpPanel = new JPanel(new BorderLayout(10, 10));
+        signUpPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        signUpPanel.setBackground(new Color(230, 240, 255));
+
+        // Header label
+        JLabel headerLabel = new JLabel("Sign Up", JLabel.CENTER);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        headerLabel.setForeground(new Color(0, 102, 204));
+        signUpPanel.add(headerLabel, BorderLayout.NORTH);
+
+        // Input fields panel
+        JPanel fieldsPanel = new JPanel(new GridBagLayout());
+        fieldsPanel.setBackground(new Color(230, 240, 255));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        Dimension inputBoxSize = new Dimension(300, 30);
+
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 1;
+        fieldsPanel.add(new JLabel("Username:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 0; gbc.gridwidth = 2;
+        usernameField = new JTextField();
+        usernameField.setPreferredSize(inputBoxSize);
+        fieldsPanel.add(usernameField, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 1;
+        fieldsPanel.add(new JLabel("Email:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 1; gbc.gridwidth = 2;
+        emailField = new JTextField();
+        emailField.setPreferredSize(inputBoxSize);
+        fieldsPanel.add(emailField, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 1;
+        fieldsPanel.add(new JLabel("Password:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 2; gbc.gridwidth = 2;
+
+        JPanel passwordPanel = new JPanel(new BorderLayout());
+        passwordField = new JPasswordField();
+        passwordField.setPreferredSize(inputBoxSize);
+        JButton eyeButton = new JButton("👁️");
+        eyeButton.setFocusPainted(false);
+        eyeButton.setBackground(Color.WHITE);
+
+        passwordPanel.add(passwordField, BorderLayout.CENTER);
+        passwordPanel.add(eyeButton, BorderLayout.EAST);
+
+        fieldsPanel.add(passwordPanel, gbc);
+
+        eyeButton.addActionListener(e -> {
+            if (passwordField.getEchoChar() != '\u0000') {
+                passwordField.setEchoChar('\u0000');
+            } else {
+                passwordField.setEchoChar('●');
+            }
+        });
+
+        signUpPanel.add(fieldsPanel, BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setBackground(new Color(230, 240, 255));
+        signUpButton = new JButton("Sign Up");
+        signUpButton.setBackground(new Color(51, 153, 255));
+        signUpButton.setForeground(Color.WHITE);
+        signUpButton.setPreferredSize(new Dimension(200, 40)); // Make the button larger
+        signUpButton.setFont(new Font("Arial", Font.BOLD, 14));
+
+        signUpButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = usernameField.getText().trim();
+                String password = new String(passwordField.getPassword()).trim();
+                String email = emailField.getText().trim();
+
+                if (isValidSignUp(username, password, email)) {
+                    saveUserData(username, password, email);
+                    JOptionPane.showMessageDialog(frame, "Sign-up successful! Please log in.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    frame.remove(signUpPanel);
+                    initializeLoginPanel();
+                    frame.add(loginPanel);
+                    frame.revalidate();
+                    frame.repaint();
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Invalid sign-up details!", "Sign-Up Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        buttonPanel.add(signUpButton);
+        signUpPanel.add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void initializeSurveyPanel() {
+        surveyPanel = new JPanel(new BorderLayout());
+        questionPanel = new JPanel(new GridLayout(6, 1, 10, 10));
+        progressBar = new JProgressBar(0, questions.size());
+        progressBar.setValue(0);
+        progressBar.setStringPainted(true);
+
+        surveyPanel.add(progressBar, BorderLayout.NORTH);
+        surveyPanel.add(questionPanel, BorderLayout.CENTER);
+        surveyPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        frame.add(surveyPanel);
+        frame.revalidate();
+        frame.repaint();
+        displayNextQuestion();
+    }
+
+    private void displayNextQuestion() {
+        questionPanel.removeAll();
+
+        if (questionIndex < questions.size()) {
+            String question = questions.get(questionIndex);
+            JLabel questionLabel = new JLabel("<html><body style='width: 400px'>" + question + "</body></html>");
+            questionLabel.setFont(new Font("Arial", Font.BOLD, 16));
+            JTextField responseField = new JTextField();
+            JButton nextButton = new JButton("Next");
+            nextButton.setBackground(new Color(51, 153, 255));
+            nextButton.setForeground(Color.WHITE);
+
+            nextButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String response = responseField.getText().trim();
+
+                    if (response.isEmpty()) {
+                        JOptionPane.showMessageDialog(frame, "Please fill in the answer before proceeding.", "Input Error", JOptionPane.WARNING_MESSAGE);
+                    } else if (!isValidResponse(response, questionIndex)) {
+                        JOptionPane.showMessageDialog(frame, "Invalid answer. Please enter 'yes', 'no', or a number between 1 and 5, as applicable.", "Input Error", JOptionPane.WARNING_MESSAGE);
+                    } else {
+                        responses.add(response);
+                        progressBar.setValue(questionIndex + 1);
+                        showTopicDetailsOption(question);
+                        questionIndex++;
+                        displayNextQuestion();
+                    }
+                }
+            });
+
+            questionPanel.add(questionLabel);
+            questionPanel.add(responseField);
+            questionPanel.add(nextButton);
+        } else {
+            frame.remove(surveyPanel);
+            showSurveySummary();
+        }
+
+        frame.revalidate();
+        frame.repaint();
+    }
+
+    private void showTopicDetailsOption(String question) {
+        String topic = getTopicFromQuestion(question);
+
+        if (topic != null && topicDetails.containsKey(topic)) {
+            int result = JOptionPane.showConfirmDialog(frame, "Would you like to know more about this topic?", "More Information", JOptionPane.YES_NO_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+                showDetailedInfo(topic);
+            }
+        }
+    }
+
+    private String getTopicFromQuestion(String question) {
+        String lowerQuestion = question.toLowerCase();
+        if (lowerQuestion.contains("coding")) return "coding";
+        if (lowerQuestion.contains("cybersecurity")) return "cybersecurity";
+        if (lowerQuestion.contains("data")) return "data";
+        if (lowerQuestion.contains("it systems")) return "it systems";
+        if (lowerQuestion.contains("artificial intelligence")) return "artificial intelligence";
+        if (lowerQuestion.contains("user interfaces")) return "user interfaces";
+        if (lowerQuestion.contains("network administration")) return "network administration";
+        if (lowerQuestion.contains("troubleshooting hardware")) return "hardware troubleshooting";
+        if (lowerQuestion.contains("teaching technology")) return "teaching technology";
+        return null;
+    }
+
+    private void showDetailedInfo(String topic) {
+        JFrame detailFrame = new JFrame("Details about " + capitalize(topic));
+        detailFrame.setSize(600, 450);
+        detailFrame.setLayout(new BorderLayout());
+        detailFrame.setLocationRelativeTo(frame);
+
+        JTextArea detailsText = new JTextArea(topicDetails.get(topic));
+        detailsText.setWrapStyleWord(true);
+        detailsText.setLineWrap(true);
+        detailsText.setEditable(false);
+        detailsText.setFont(new Font("Serif", Font.PLAIN, 14));
+
+        JScrollPane scrollPane = new JScrollPane(detailsText);
+        detailFrame.add(scrollPane, BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel();
+
+        JButton pursueButton = new JButton("Pursue");
+        pursueButton.setBackground(new Color(51, 153, 255));
+        pursueButton.setForeground(Color.WHITE);
+        pursueButton.addActionListener(e -> showPursueOptions(topic));
+
+        JButton closeButton = new JButton("Back");
+        closeButton.addActionListener(e -> detailFrame.dispose());
+
+        buttonPanel.add(pursueButton);
+        buttonPanel.add(closeButton);
+
+        detailFrame.add(buttonPanel, BorderLayout.SOUTH);
+        detailFrame.setVisible(true);
+    }
+
+    private void showPursueOptions(String topic) {
+        JFrame pursueFrame = new JFrame("Pursue " + capitalize(topic));
+        pursueFrame.setSize(500, 400);
+        pursueFrame.setLayout(new BorderLayout());
+        pursueFrame.setLocationRelativeTo(frame);
+
+        JEditorPane pursuePane = new JEditorPane();
+        pursuePane.setContentType("text/html");
+        pursuePane.setEditable(false);
+
+        String resources = getPursueResources(topic, "");
+        pursuePane.setText(resources);
+
+        pursuePane.addHyperlinkListener(e -> {
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                String url = e.getDescription();
+
+                if (url.startsWith("http")) {
+                    try {
+                        Desktop.getDesktop().browse(new URI(url));
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                } else {
+                    String subtopic = parseSubtopicFromURL(url); // Extract subtopic
+                    String updatedResources = getPursueResources(topic, subtopic); // Load subtopic content
+                    pursuePane.setText(updatedResources);
+                }
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(pursuePane);
+        pursueFrame.add(scrollPane, BorderLayout.CENTER);
+
+        JButton closeButton = new JButton("Back");
+        closeButton.addActionListener(e -> pursueFrame.dispose());
+        pursueFrame.add(closeButton, BorderLayout.SOUTH);
+
+        pursueFrame.setVisible(true);
+    }
+
+    private String parseSubtopicFromURL(String url) {
+        String[] parts = url.split("=");
+        return parts.length > 1 ? parts[1] : "";
+    }
+
+    private String getPursueResources(String topic, String subtopic) {
+        if ("coding".equalsIgnoreCase(topic) && (subtopic == null || subtopic.isEmpty())) {
+            return "<html><h3>Coding Learning Path</h3>"
+                    + "<p>Select a language to learn:</p>"
+                    + "<ul>"
+                    + "<li><a href='coding?subtopic=java'>Java</a></li>"
+                    + "<li><a href='coding?subtopic=python'>Python</a></li>"
+                    + "<li><a href='coding?subtopic=cpp'>C++</a></li>"
+                    + "</ul></html>";
+        } else if ("coding".equalsIgnoreCase(topic)) {
+            switch (subtopic.toLowerCase()) {
+                case "java":
+                    return "<html><h3>Java Learning Path</h3>"
+                            + "<ul>"
+                            + "<li><b>IDE Setup:</b> <a href='https://youtu.be/JCSp1_YR64A?si=ebr--tOm7bII-jzo'>Setting Up Your IDE</a></li><br>"
+                            + "<li><b>Start with Introduction:</b> <a href='https://youtu.be/yRpLlJmRo2w?si=x7Ze74pM-dXfxenN'>Coding Basics Tutorial</a></li><br>"
+                            + "<li><b>Variables in Java,Input and Output :</b> <a href='https://youtu.be/LusTv0RlnSU?si=MQEEPcWERFk8kf69'>Variables in Java , Input and Output </a></li><br>"
+                            + "<li><b>Conditional Statements | If-else, Switch Break :</b> <a href='https://youtu.be/I5srDu75h_M?si=AfOgodx7YDR9BKuD'>Conditional Statements | If-else, Switch Break</a></li><br>"
+                            + "<li><b>Loops in Java :</b> <a href='https://youtu.be/pTB0EiLXUC8?si=q-6dsnhZyuBp0aHW'>Loops in Java </a></li><br>"
+                            + "<li><b>Functions in Java  :</b> <a href='https://youtu.be/qcSz4ef9UHA?si=y6vECZb_cGOdeA0s'>Functions in Java </a></li><br>"
+                            + "<li><b>Basics of Time Complexity and Space Complexity | Java:</b> <a href='https://youtu.be/JCSp1_YR64A?si=ebr--tOm7bII-jzo'>Basics of Time Complexity and Space Complexity in Java</a></li><br>"
+                            + "<li><b>Arrays Introduction | Java :</b> <a href='https://youtu.be/NTHVTY6w2Co?si=22GuE7utSoyXIy0l'>Arrays Introduction in Java </a></li><br>"
+                            + "<li><b>2D Arrays | Java:</b> <a href='https://www.example.com/coding-advanced'>2D Arrays in Java </a></li><br>"
+                            + "<li><b>Strings | Lecture 12 | Java :</b> <a href='https://youtu.be/vCRD36bG8xQ?si=WrCbD3SyvPXHjohC'>Strings in Java </a></li><br>"
+                            + "<li><b>String Builder in Java  | Java :</b> <a href='https://youtu.be/ZLDwskEhIFg?si=kumdC127MFe1tp0y'>String Builder in Java  </a></li><br>"
+                            + "<li><b>Sorting in Java | Bubble Sort, Selection Sort & Insertion Sort | Java:</b> <a href='https://youtu.be/PkJIc5tBRUE?si=pFTjx2-DSHSJEyXX'>Sorting in Java | Bubble Sort, Selection Sort & Insertion Sort | Java</a></li><br>"
+                            + "<li><b>Java OOPs in One Shot | Object Oriented Programming | Java:</b> <a href='https://youtu.be/bSrm9RXwBaI?si=UatMTVyTo4FgbltG'>Java OOPs in One Shot | Object Oriented Programming in Java</a></li><br>"
+                            + "</ul></html>";
+
+                case "python":
+                    return "<html><h3>Python Learning Path</h3>"
+                            + "<ul>"
+                            +"<li><b>Python Course Lecture 1 Variables & Data Types:</b> <a href='https://youtu.be/t2_Q2BRzeEE?si=pwEr4I7_Y6RPH1Cc'>Python Course Lecture 1 Variables & Data Types </a></li><br>"
+                            +"<li><b>Python Course Lecture 2 Strings & Conditional Statements:</b> <a href='https://www.example.com/coding-advanced'>Python Course Lecture 2 Strings & Conditional Statements</a></li><br>"
+                            +"<li><b>Python Course Lecture 3 List & Tuple in Python:</b> <a href='https://youtu.be/qVyvmzFxF_o?si=-8sUQDrYItBA3GbF'>Python Course Lecture 3 List & Tuple in Python </a></li><br>"
+                            +"<li><b>Python Course Lecture 4 Dictionary & Set in Python :</b> <a href='https://youtu.be/078tYSD7K8E?si=u7i_wIIGUf0USRO2'>Python Course  Lecture 4 Dictionary & Set in Python </a></li><br>"
+                            +"<li><b>Python Course Lecture 5 Loops in Python:</b> <a href='https://youtu.be/S73thl0AyFU?si=MnIsmDlHEVFqC8KU'>Python Course Lecture 5 Loops in Python </a></li><br>"
+                            +"<li><b>Python Course Lecture 6 Functions & Recursion:</b> <a href='https://youtu.be/OvTH-7ESoRA?si=S4lTqy1XP6SoEDyw'>Python Course Lecture 6 : Functions & Recursion </a></li><br>"
+                            +"<li><b>Python Course Lecture 7 File Input/Output :</b> <a href='https://youtu.be/jU0cndZziO0?si=5FDg2aEGZKv2sxVT'>Python Course Lecture 7 File Input/Output  </a></li><br>"
+                            +"<li><b>Python Course Lecture 8 Object Oriented Programming | Classes & Objects :</b> <a href='https://youtu.be/HeW-D6KpDwY?si=PHzVQEUNbqODORD1'>Python Course Lecture 8 Object Oriented Programming | Classes & Objects </a></li><br>"
+                            +"<li><b>Python Course Lecture 9 Part 2 Object Oriented Programming :</b> <a href='https://youtu.be/bAwmZVJeO5s?si=hKlLkZ2sOsB-JnAp'>Python Course Lecture 9 Part 2 Object Oriented Programming </a></li><br>"
+                            + "</ul></html>";
+                case "cpp":
+                    return "<html><h3>C++ Learning Path</h3>"
+                            + "<ul>"
+                            + "<li><b>Lecture 1 Flowchart & Pseudocode + Installation:</b> <a href='https://youtu.be/VTLCoHnyACE?si=V4-iH34T7TWdWxmJ'>Lecture 1 Flowchart & Pseudocode + Installation </a></li><br>"
+                            + "<li><b>Lecture 2 Variable, Data Types & Operators </b> <a href='https://youtu.be/Dxu7GKtdbnA?si=7suKnfaUJwmaa-jk'>Lecture 2 Variable, Data Types & Operators  </a></li><br>"
+                            + "<li><b>Lecture 3 Conditional Statements & Loops :</b> <a href='https://youtu.be/qR9U6bKxJ7g?si=Ho3DptUhEZ5hEEv6'> Lecture 3 Conditional Statements & Loops </a></li><br>"
+                            + "<li><b>Lecture 4 Patterns :</b> <a href='https://youtu.be/rga_q2N7vU8?si=MhSZuuVeGO12TUu9'> Lecture 4: Patterns</a></li><br>"
+                            + "<li><b>Lecture 5 Functions :</b> <a href='https://youtu.be/P08Z_NC8GuY?si=HvpQY3BJxJKWlbKo'> Lecture 5: Functions </a></li><br>"
+                            + "<li><b>Lecture 6 Binary Number System:</b> <a href='https://youtu.be/xpy5NXiBFvA?si=-Rvg9vCJME1ZrSKk'>Lecture 6 Binary Number System</a></li><br>"
+                            + "<li><b>Lecture 7 Bitwise Operators, Data Type Modifiers :</b> <a href='https://youtu.be/r-u4uh3QvsQ?si=nJycLrXQS_UMTzAD'>Lecture 7 Bitwise Operators, Data Type Modifiers </a></li><br>"
+                            + "<li><b>Lecture 8 Array Data Structure - Part1:</b> <a href='https://youtu.be/8wmn7k1TTcI?si=fgGGLi-_APzzYzeR'>Lecture 8 Array Data Structure - Part1</a></li><br>"
+                            + "<li><b>Lecture 9 Vectors in C++ | Arrays Part 2:</b> <a href='https://youtu.be/NWg38xWYzEg?si=bwDguA-6M_6o3yWo'>Lecture 9 Vectors in C++ | Arrays Part 2</a></li><br>"
+                            + "<li><b>Lecture 10 Kadane's Algorithm:</b> <a href='https://youtu.be/9IZYqostl2M?si=6iBdZF4Fn3MoRxN3'>Lecture 10 Kadane's Algorithm</a></li><br>"
+                            + "</ul></html>";
+            }
+        }
+        if ("cybersecurity".equalsIgnoreCase(topic)) {
+            return "<html><h3>Cybersecurity Learning Path</h3>"
+                    + "<ul>"
+                    + "<li><b>Cyber Security Week Day - 1 |Cryptography Full Course :</b> <a href='https://www.youtube.com/live/Hm35SS_PY5g?si=RlNlqjhke9RUk__P'>Cyber Security Week Day - 1 |Cryptography Full Course </a></li><br>"
+                    + "<li><b>Cyber Security Week Day - 2 | Ethical Hacking Full Course :</b> <a href='https://www.youtube.com/live/3OkXu3Wxnvg?si=Y8dwoPN1IuN6apJh'>Cyber Security Week Day - 2 | Ethical Hacking Full Course </a></li><br>"
+                    + "<li><b>Open System Interconnection Model :</b> <a href='https://youtu.be/Vez9dGiORG8?si=1KCbU_9WDm9Mrjlu'> Open System Interconnection Model</a></li><br>"
+                    + "<li><b>What Is Cross Site Scripting Attack?:</b> <a href='https://youtu.be/43yYsui3xZc?si=d_kXnj3B58OicKr9'>What Is Cross Site Scripting Attack? </a></li><br>"
+                    + "<li><b>Advanced Executive Program In Cybersecurity :</b> <a href='https://youtu.be/6DeZ-scCuT0?si=B4y9E_d_wWzRf8m7'>Advanced Executive Program In Cybersecurity </a></li><br>"
+                    + "<li><b> How To Detect Computer Virus | Computer Hacks :</b> <a href='https://youtu.be/nU0jdP0PbJg?si=9pnJiqzslmt6hLc8'> How To Detect Computer Virus | Computer Hacks </a></li><br>"
+                    + "<li><b>Ubuntu vs Debian 2022: Which One Should You Choose?  :</b> <a href='https://youtu.be/IVpwBHLA-Wg?si=ZFsfq4hSXDUXZOA3'>Ubuntu vs Debian 2022: Which One Should You Choose?  </a></li><br>"
+                    + "<li><b> What Is TCP/IP Address? :</b> <a href='https://youtu.be/CsektxtqA8c?si=u1l4kisOrFemKdun'> What Is TCP/IP Address? </a></li><br>"
+                    + "<li><b> What Is SolarWinds Attack?:</b> <a href='https://youtu.be/RxGI-l4VxL0?si=XRcqBZVZKiqo70jF'>What Is SolarWinds Attack? </a></li><br>"
+                    + "<li><b> What Is Subneting? | How It Works?  :</b> <a href='https://youtu.be/mgu4blmFF_w?si=7annnPS_oNVLkgYp'> What Is Subneting? | How It Works?  </a></li><br>"
+                    + "<li><b> What Is A Proxy? | What Is A Proxy Server? :</b> <a href='https://youtu.be/j9-Y0KWVJ1k?si=lfmpmWSBQhRSXs1z'> What Is A Proxy? | What Is A Proxy Server? </a></li><br>"
+                    + "</ul></html>";
+        }
+        if ("data".equalsIgnoreCase(topic)) {
+            return "<html><h3>Data Science Learning Path</h3>"
+                    + "<ul>"
+                    + "<li><b>Data Analytics FULL Course for Beginners :</b> <a href='https://youtu.be/VaSjiJMrq24?si=dGf-3Je1EzTwauYS'>Data Analytics FULL Course for Beginners </a></li><br>"
+                    + "<li><b>Complete Data Analytics Portfolio Project :</b> <a href='https://youtu.be/hK-qUy3UfT8?si=UoHChjaGjUzxg0oa'>Complete Data Analytics Portfolio Project </a></li><br>"
+                    + "<li><b>SQL Full Course for Data Analytics :</b> <a href='https://youtu.be/2w-M4z-iQpk?si=9F_hHbeNY-IeUosr'>SQL Full Course for Data Analytics </a></li><br>"
+                    + "<li><b>Data Analytics Portfolio Project :</b> <a href='https://youtu.be/mc-1YfycyrM?si=pM5jp-8ezH7vI1Co'>Data Analytics Portfolio Project </a></li><br>"
+                    + "<li><b>FASTEST Way to Learn Data Analytics  :</b> <a href='https://youtu.be/P-F31b9jKNE?si=ecn2r6R4QgfjBBck'>FASTEST Way to Learn Data Analytics  </a></li><br>"
+                    + "<li><b>Data Analytics Full Course  :</b> <a href='https://youtu.be/50jRyGJ8IPc?si=6I44YMdkNnOVV0EY'>Data Analytics Full Course  </a></li><br>"
+                    + "<li><b>-Demand Data Analytics :</b> <a href='https://youtu.be/MZil-Dm5nmk?si=N2xPQC12Co2PUsia'>-Demand Data Analytics </a></li><br>"
+                    + "<li><b>Data Analytics Project :</b> <a href='https://youtu.be/Cq-w8AGLLzc?si=DzmGquybPLOauuE-'>Data Analytics Project </a></li><br>"
+                    + "</ul></html>";
+        }
+        if ("it systems".equalsIgnoreCase(topic)) {
+            return "<html><h3>IT Systems Learning Path</h3>"
+                    + "<ul>"
+                    + "<li><b>Lecture 1 : Information Security Basic Concepts :</b> <a href='https://youtu.be/QqntPZqNHms?si=glZcp54Gyft-Rr-P'>Lecture 1 : Information Security Basic Concepts </a></li><br>"
+                    + "<li><b>Lecture 2 : Information Security Management & Governance :</b> <a href='https://youtu.be/ziuBRexf_Mg?si=5v-H-Mb2aiN6Q0JV'> Lecture 2 : Information Security Management & Governance </a></li><br>"
+                    + "<li><b>Lecture 3 : Cryptography - Hashing - Ciphering :</b> <a href='https://youtu.be/T4pPmx2q99M?si=0xLt-2_eOyPqE1ks'>Lecture 3 : Cryptography - Hashing - Ciphering </a></li><br>"
+                    + "<li><b>Lecture 4: Message Authentication, SSL, TSL & Digital Signature :</b> <a href='https://youtu.be/Xw-L-kQxq5o?si=_lSNaf2nDt8-Xnbt'> Lecture 4: Message Authentication, SSL, TSL & Digital Signature </a></li><br>"
+                    + "<li><b>Lecture 5 : Risk Management & Business Continuity Management :</b> <a href='https://youtu.be/90yaFsiDc3w?si=njRwwIw44GbM6MUz'>Lecture 5 : Risk Management & Business Continuity Management </a></li><br>"
+                    + "<li><b> Lecture 6 : Computer Security, Platform Virtualization, Hyper-V :</b> <a href='https://youtu.be/Z9u8bulZwZQ?si=pyIdZZ83HJNepVcL'> Lecture 6 : Computer Security, Platform Virtualization, Hyper-V </a></li><br>"
+                    + "<li><b> Lecture 7 : Digital Forensics and Incident Response, Evidence :</b> <a href='https://youtu.be/gbiCWiH0W3g?si=saUd4s1Q_dBSfxkR'> Lecture 7 : Digital Forensics and Incident Response, Evidence </a></li><br>"
+                    + "<li><b> Lecture 8 : User Authentication, Passwords, Tokens & Biometrics :</b> <a href='https://youtu.be/b_A5nH2uz88?si=Bfo9dOQGkbNVwLu2'> Lecture 8 : User Authentication, Passwords, Tokens & Biometrics </a></li><br>"
+                    + "</ul></html>";
+        }
+        if ("AI".equalsIgnoreCase(topic)) {
+            return "<html><h3>Artificial Intelligence Learning Path</h3>"
+                    + "<ul>"
+                    + "<li><b>AI Course Lecture 1  :</b> <a href='https://youtu.be/3tDE4hDaYgw?si=ehqe-x-JTUvIwPqo'>AI Course Lecture 1 </a></li><br>"
+                    + "<li><b>AI Course Lecture 2  :</b> <a href='https://youtu.be/p7W6qzL5XEQ?si=B9wcQ4Mpuvh9tq4D'>AI Course Lecture 2  </a></li><br>"
+                    + "<li><b>AI Course Lecture 3  :</b> <a href='https://youtu.be/268cbRb6R6s?si=2DxIobOuPcampjOk'>AI Course Lecture 3  </a></li><br>"
+                    + "<li><b>AI Course Lecture 4  :</b> <a href='https://youtu.be/ZnOIJq6HjI4?si=KEDlfdijIBwTOdsw'>AI Course Lecture 4  </a></li><br>"
+                    + "<li><b>AI Course Lecture 5  :</b> <a href='https://youtu.be/3iAl-rHo51M?si=Ifr7p2ChoCQjjTqU'>AI Course Lecture 5  </a></li><br>"
+                    + "<li><b>AI Course Lecture 6  :</b> <a href='https://youtu.be/-Tt_NyJZIpU?si=FJL9_gJ2-kq0vrP-'>AI Course Lecture 6  </a></li><br>"
+                    + "<li><b>AI Course Lecture 7  :</b> <a href='https://youtu.be/3-uC7JbIrMc?si=wBCNj5aDFU5QojZ3'>AI Course Lecture 7  </a></li><br>"
+                    + "<li><b>AI Course Lecture 8  :</b> <a href='https://youtu.be/zX-vG4cM6xs?si=u-gt4XRG3N5LD0r9'>AI Course Lecture 8  </a></li><br>"
+                    + "<li><b>AI Course Lecture 9  :</b> <a href='https://youtu.be/syHXG_Lci-s?si=vgGuIwtp_9q7bdr2'>AI Course Lecture 9  </a></li><br>"
+                    + "<li><b>AI Course Lecture 10  :</b> <a href='https://youtu.be/TJpsR5dpTgY?si=x41UB9vRaJD_Lspf'>AI Course Lecture 10  </a></li><br>"
+                    + "<li><b>AI Course Lecture 11  :</b> <a href='https://youtu.be/2pfFdTVs-2w?si=2xsG00ehcT3TZps8'>AI Course Lecture 11  </a></li><br>"
+                    + "</ul></html>";
+        }
+        if ("UI".equalsIgnoreCase(topic)) {
+            return "<html><h3>User Interface Design Learning Path</h3>"
+                    + "<ul>"
+                    + "<li><b>UI Course Lecture 1  :</b> <a href='https://youtu.be/O5IXf8qB9U4?si=AxQaAEhn7VmtQVKr'>UI Course Lecture 1 </a></li><br>"
+                    + "<li><b>UI Course Lecture 2  :</b> <a href='https://youtu.be/SKvsPh0qdQU?si=Yh_Ksdr4kP6fLlFU'>UI Course Lecture 2  </a></li><br>"
+                    + "<li><b>UI Course Lecture 3  :</b> <a href='https://youtu.be/h9r_UpOzajA?si=OIvLEXP45smQVWA9'>UI Course Lecture 3  </a></li><br>"
+                    + "<li><b>UI Course Lecture 4  :</b> <a href='https://youtu.be/yhqEqcWMoqs?si=0UPZwsDX4XyB96uQ'>UI Course Lecture 4  </a></li><br>"
+                    + "<li><b>UI Course Lecture 5  :</b> <a href='https://youtu.be/C5h1ZE1AhlI?si=o4JP9cWSFwl2SFhe'>UI Course Lecture 5  </a></li><br>"
+                    + "<li><b>UI Course Lecture 6  :</b> <a href='https://youtu.be/gJ6cvzZ0ewQ?si=1LMPgZaPVZiSiZ4p'>UI Course Lecture 6  </a></li><br>"
+                    + "<li><b>UI Course Lecture 7  :</b> <a href='https://youtu.be/FdJz-rfMPFk?si=Kff4VKIMO4MKj4EP'>UI Course Lecture 7  </a></li><br>"
+                    + "<li><b>UI Course Lecture 8  :</b> <a href='https://youtu.be/O9-t0DtoobA?si=JLoRJ_QnaAaqFpR6>UI Course Lecture 8  </a></li><br>"
+                    + "<li><b>UI Course Lecture 9  :</b> <a href='https://youtu.be/pYQBvAYnL1I?si=aLRZnU-0qh7MVBYC'>UI Course Lecture 9  </a></li><br>"
+                    + "<li><b>UI Course Lecture 10  :</b> <a href='https://youtu.be/znXYS0egkqw?si=xWPoSQWEXuHrmIlT'>UI Course Lecture 10  </a></li><br>"
+                    + "<li><b>UI Course Lecture 11  :</b> <a href='https://youtu.be/l-gMLFgJ1Ww?si=GwL3O_IXi9xb94w-'>UI Course Lecture 11  </a></li><br>"
+                    + "</ul></html>";
+        }
+        if ("Network Administration".equalsIgnoreCase(topic)) {
+            return "<html><h3>Network Administration Learning Path</h3>"
+                    + "<ul>"
+                    + "<li><b>Network Administration Course Lecture 1  :</b> <a href='https://youtu.be/GtZDlmRTfGY?si=lGH5qOnVbBPNj8vu'>Network Administration Course Lecture 1 </a></li><br>"
+                    + "<li><b>Network Administration Course Lecture 2 :</b> <a href='https://youtu.be/_BJ-bSDCO88?si=8fdhfz7M8qmsUh1s'>Network Administration Course Lecture 1 </a></li><br>"
+                    + "<li><b>Network Administration Course Lecture 3  :</b> <a href='https://youtu.be/q0W22Jcq5vU?si=lkxbKHeDVV92l9D8'>Network Administration Course Lecture 1 </a></li><br>"
+                    + "<li><b>Network Administration Course Lecture 4  :</b> <a href='https://youtu.be/GgKmlIYV8YQ?si=GrHU6k7ixngt2Dwc'>Network Administration Course Lecture 1 </a></li><br>"
+                    + "<li><b>Network Administration Course Lecture 5  :</b> <a href='https://youtu.be/TxM5vraDeGQ?si=VqhTylMvAtm6ukFk'>Network Administration Course Lecture 1 </a></li><br>"
+                    + "<li><b>Network Administration Course Lecture 6  :</b> <a href='https://youtu.be/HZdgOdUT49A?si=O_918ZMxwGMWFZE_'>Network Administration Course Lecture 1 </a></li><br>"
+                    + "<li><b>Network Administration Course Lecture 7  :</b> <a href='https://youtu.be/WZ6A0MhFgvE?si=Xa365ZBK4suiaCa3'>Network Administration Course Lecture 1 </a></li><br>"
+                    + "<li><b>Network Administration Course Lecture 8  :</b> <a href='https://youtu.be/GhT6TdAFJds?si=ncHD7vOqv0oCm7Es'>Network Administration Course Lecture 1 </a></li><br>"
+                    + "<li><b>Network Administration Course Lecture 9  :</b> <a href='https://youtu.be/lCh_6mNXZ0E?si=u6NiQybvDMA5HQmw'>Network Administration Course Lecture 1 </a></li><br>"
+                    + "<li><b>Network Administration Course Lecture 10  :</b> <a href='https://youtu.be/IdKKdAEo6DA?si=ADHotQYscMgzT7c4'>Network Administration Course Lecture 1 </a></li><br>"
+                    + "<li><b>Network Administration Course Lecture 11  :</b> <a href='https://youtu.be/R29gFqwGKIc?si=KdPwPOJKZinmIvhx'>Network Administration Course Lecture 1 </a></li><br>"
+                    + "</ul></html>";
+        }
+        if ("hardware troubleshooting".equalsIgnoreCase(topic)) {
+            return "<html><h3>Hardware Troubleshooting Learning Path</h3>"
+                    + "<ul>"
+                    + "<li><b>hardware troubleshooting Course Lecture 1  :</b> <a href='https://youtu.be/GvhWpa7Q9Xo?si=o0s1Ls6FEA_i4OTG'>hardware troubleshooting Course Lecture 1 </a></li><br>"
+                    + "<li><b>hardware troubleshooting Course Lecture 2 :</b> <a href='https://youtu.be/EmY4urCfZVA?si=rPiasJ78ND4H7xFy'>hardware troubleshooting Course Lecture 2 </a></li><br>"
+                    + "<li><b>hardware troubleshooting Course Lecture 3  :</b> <a href='https://youtu.be/SkzXBtQyZTk?si=Tg85Rswk-iyHJqwp'>hardware troubleshooting Course Lecture 3 </a></li><br>"
+                    + "<li><b>hardware troubleshooting Course Lecture 4  :</b> <a href='https://youtu.be/xpHMHKj4Cuo?si=KRlBjuPL2ZnNCT7K'>hardware troubleshooting Course Lecture 4 </a></li><br>"
+                    + "<li><b>hardware troubleshooting Course Lecture 5  :</b> <a href='https://youtu.be/gcauzoLEtxs?si=aI0wM6pkMH6ZggrB'>hardware troubleshooting Course Lecture 5 </a></li><br>"
+                    + "<li><b>hardware troubleshooting Course Lecture 6  :</b> <a href='https://youtu.be/1PDl5cRcdsQ?si=WXXaIEEHo7uWThjm'>hardware troubleshooting Course Lecture 6 </a></li><br>"
+                    + "<li><b>hardware troubleshooting Course Lecture 7  :</b> <a href='https://youtu.be/eZQq6RyzLwc?si=ZwoZknhkyjCtvs8c'>hardware troubleshooting Course Lecture 7 </a></li><br>"
+                    + "<li><b>hardware troubleshooting Course Lecture 8  :</b> <a href='https://youtu.be/ytST-UXAGBA?si=HM840f7u3wSfi9ap'>hardware troubleshooting Course Lecture 8 </a></li><br>"
+                    + "<li><b>hardware troubleshooting Course Lecture 9  :</b> <a href='https://youtu.be/xy6Zi-k4s2g?si=kJieRfEwuWndgwm7'>hardware troubleshooting Course Lecture 9 </a></li><br>"
+                    + "<li><b>hardware troubleshooting Course Lecture 10  :</b> <a href='https://youtu.be/pKsTUWpW_WY?si=otLGJ6Cm8Nadc9NZ'>hardware troubleshooting Course Lecture 10 </a></li><br>"
+                    + "<li><b>hardware troubleshooting Course Lecture 11  :</b> <a href='https://youtu.be/pKsTUWpW_WY?si=7EOgPXV2VwVYKaoX'>hardware troubleshooting Course Lecture 11 </a></li><br>"
+                    + "</ul></html>";
+        }
+        return "<html><h3>Topic Not Found</h3><p>No extended resources available for this topic.</p></html>";
+    }
+    private void showSurveySummary() {
+        JPanel summaryPanel = new JPanel(new GridLayout(questions.size() + 1, 1, 5, 5));
+        summaryPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        summaryPanel.setBackground(Color.WHITE);
+
+        JLabel summaryLabel = new JLabel("Survey Summary:");
+        summaryLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        summaryLabel.setForeground(new Color(0, 102, 204));
+        summaryPanel.add(summaryLabel);
+
+        for (int i = 0; i < questions.size(); i++) {
+            summaryPanel.add(new JLabel((i + 1) + ". " + questions.get(i) + ": " + responses.get(i)));
+        }
+
+        int result = JOptionPane.showConfirmDialog(frame, summaryPanel, "Survey Summary", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            initializeResultsPanel();
+        } else {
+            JOptionPane.showMessageDialog(frame, "You can retake the survey anytime.", "Survey Incomplete", JOptionPane.INFORMATION_MESSAGE);
+            frame.dispose();
+        }
+    }
+
+    private void initializeResultsPanel() {
+        resultsPanel = new JPanel(new BorderLayout());
+        resultsPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        resultsPanel.setBackground(new Color(230, 240, 255));
+
+        JLabel suggestionLabel = new JLabel("Career Suggestions:");
+        suggestionLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        suggestionLabel.setForeground(new Color(0, 102, 204));
+        resultsPanel.add(suggestionLabel, BorderLayout.NORTH);
+
+        JTextArea suggestionsText = new JTextArea();
+        suggestionsText.setEditable(false);
+        suggestionsText.setFont(new Font("Arial", Font.PLAIN, 14));
+        suggestionsText.setLineWrap(true);
+        suggestionsText.setWrapStyleWord(true);
+        suggestionsText.setText(generateCareerSuggestions());
+
+        JScrollPane scrollPane = new JScrollPane(suggestionsText);
+        resultsPanel.add(scrollPane, BorderLayout.CENTER);
+
+        JButton feedbackButton = new JButton("Close");
+        feedbackButton.setBackground(new Color(51, 153, 255));
+        feedbackButton.setForeground(Color.WHITE);
+        feedbackButton.addActionListener(e -> {
+            JOptionPane.showMessageDialog(frame, "Thank you for using the Career Interest Matcher!", "Goodbye", JOptionPane.INFORMATION_MESSAGE);
+            frame.dispose();
+        });
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(feedbackButton);
+        resultsPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        frame.add(resultsPanel);
+        frame.revalidate();
+        frame.repaint();
+    }
+    private String generateCareerSuggestions() {
+        StringBuilder suggestions = new StringBuilder();
+
+        if (responses.contains("yes_programming") && getRating("Rate your programming skills (1-5)") >= 2) {
+            suggestions.append("- Software Developer\n");
+            suggestions.append("- Web Developer\n");
+            suggestions.append("- Game Programmer\n\n");
+        }
+
+        if (responses.contains("yes_cybersecurity") && getRating("Rate your analytical skills (1-5)") >= 3) {
+            suggestions.append("- Cybersecurity Analyst\n");
+            suggestions.append("- Security Consultant\n");
+            suggestions.append("- Penetration Tester\n\n");
+        }
+
+        if (responses.contains("yes_data") && getRating("Rate your analytical skills (1-5)") >= 4) {
+            suggestions.append("- Data Scientist\n");
+            suggestions.append("- Data Analyst\n");
+            suggestions.append("- Data Engineer\n\n");
+        }
+
+        if (suggestions.length() == 0) {
+            suggestions.append("Consider exploring various fields to find the best fit for your interests and skills.");
+        }
+
+        return suggestions.toString();
+    }
+
+    private int getRating(String question) {
+        for (int i = 0; i < questions.size(); i++) {
+            if (questions.get(i).equals(question)) {
+                try {
+                    return Integer.parseInt(responses.get(i));
+                } catch (NumberFormatException e) {
+                    return 0;
+                }
+            }
+        }
+        return 0;
+    }
+
+    private boolean isValidSignUp(String username, String password, String email) {
+        return password.matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{4,}$") && email.endsWith("@gmail.com");
+    }
+
+    private void saveUserData(String username, String password, String email) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("user_data.txt", true))) {
+            writer.write("Username: " + username);
+            writer.newLine();
+            writer.write("Password: " + password);
+            writer.newLine();
+            writer.write("Email: " + email);
+            writer.newLine();
+            writer.write("-----");
+            writer.newLine();
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(frame, "Error saving user data.", "File Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private boolean validateLogin(String username, String password) {
+        File file = new File("user_data.txt");
+        if (!file.exists()) {
+            JOptionPane.showMessageDialog(frame, "User data file not found.", "File Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                String fileUsernameLine = scanner.nextLine();
+                String filePasswordLine = scanner.nextLine();
+                scanner.nextLine();
+                if (scanner.hasNextLine()) scanner.nextLine();
+
+                String[] usernameParts = fileUsernameLine.split(": ");
+                String[] passwordParts = filePasswordLine.split(": ");
+
+                if (usernameParts.length < 2 || passwordParts.length < 2) continue;
+
+                String fileUsername = usernameParts[1];
+                String filePassword = passwordParts[1];
+
+                if (fileUsername.equals(username) && filePassword.equals(password)) {
+                    return true;
+                }
+            }
+        } catch (FileNotFoundException e) {
+            JOptionPane.showMessageDialog(frame, "User data file not found.", "File Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return false;
+    }
+
+    private boolean isValidResponse(String response, int questionIndex) {
+        if (questionIndex < 10) {
+            return response.equalsIgnoreCase("yes") || response.equalsIgnoreCase("no");
+        } else {
+            try {
+                int rating = Integer.parseInt(response);
+                return rating >= 1 && rating <= 5;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+    }
+
+    private String capitalize(String word) {
+        return word.substring(0, 1).toUpperCase() + word.substring(1);
+    }
+    private void openLink(String url) {
+        try {
+            URI uri = new URI(url);
+            Desktop.getDesktop().browse(uri);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, "Error opening the link: " + url, "Link Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(CareerInterestMatcherAppGUI::new);    }
+}
