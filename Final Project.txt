@@ -735,6 +735,7 @@ class CareerInterestMatcherAppGUI {
             JOptionPane.showMessageDialog(frame, "Error opening the link: " + url, "Link Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+// Main 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(CareerInterestMatcherAppGUI::new);    }
 }
